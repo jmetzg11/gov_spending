@@ -21,7 +21,7 @@ def fetch_agency_codes():
 
         page += 1
 
-    file_name = os.path.join(current_dir, 'agency_codes.csv')
+    file_name = os.path.join(current_dir, 'data', 'agency_codes.csv')
     with open(file_name, mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(['Agency Name', 'Agency Code'])
@@ -30,7 +30,7 @@ def fetch_agency_codes():
 
 def fetch_budget_resources(year):
     agency_codes = {}
-    agency_file_name = os.path.join(current_dir, 'agency_codes.csv')
+    agency_file_name = os.path.join(current_dir, 'data', 'agency_codes.csv')
     with open(agency_file_name, mode='r') as file:
         reader = csv.DictReader(file)
         for row in reader:
@@ -51,7 +51,7 @@ def fetch_budget_resources(year):
         except Exception as e:
             print(f'could not find budget resource for {name}, error: {e}')
 
-    budget_file_name = os.path.join(current_dir, 'agency_resources.csv')
+    budget_file_name = os.path.join(current_dir, 'data', 'agency_resources.csv')
     with open(budget_file_name, mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(['Agency', 'Budget'])
@@ -62,7 +62,7 @@ def fetch_function_spending(years):
     functions_to_keep = ['Energy', 'Net Interest', 'Commerce and Housing Credit', 'Transportation', 'Agriculture', 'Health', 'Education, Training, Employment, and Social Services', 'National Defense']
 
     agency_codes = {}
-    agency_file_name = os.path.join(current_dir, 'agency_codes.csv')
+    agency_file_name = os.path.join(current_dir, 'data', 'agency_codes.csv')
     with open(agency_file_name, mode='r') as file:
         reader = csv.DictReader(file)
         for row in reader:
@@ -85,7 +85,7 @@ def fetch_function_spending(years):
                         function_spending[function_name] += amount
             except Exception as e:
                 print(f'could not find for budget functions for {agency_name}, {e}')
-        function_file_name = os.path.join(current_dir, f'functions_{year}.csv')
+        function_file_name = os.path.join(current_dir, 'data', f'functions_{year}.csv')
         with open(function_file_name, mode='w', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(['Function', 'Amount'])
