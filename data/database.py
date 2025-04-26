@@ -11,25 +11,24 @@ class AgencyBudget(Base):
     agency = Column(String(255))
     budget = Column(Float)
 
+class FunctionSpending(Base):
+    __tablename__ = 'function_spending'
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    year = Column(Integer, index=True)
+    name = Column(String(255))
+    amount = Column(Float)
 
 class ForeignAid(Base):
     __tablename__ = 'foreign_aid'
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    country = Column(String(255))
+    country = Column(String(255), index=True)
     amount = Column(Float)
-    year = Column(Integer)
+    year = Column(Integer, index=True)
     lat = Column(Float)
     lng = Column(Float)
 
 
-class FunctionSpending(Base):
-    __tablename__ = 'function_spending'
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    year = Column(Integer)
-    name = Column(String(255))
-    amount = Column(Float)
-
-engine = create_engine('sqlite://data.db')
+engine = create_engine('sqlite:///data.db')
 
 Base.metadata.create_all(bind=engine)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
