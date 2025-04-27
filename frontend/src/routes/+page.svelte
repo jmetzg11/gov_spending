@@ -13,33 +13,24 @@
 	function setPage(page) {
 		$activePage = page;
 	}
+
+	const infos = [
+		{ text: 'Agency', value: 'agency' },
+		{ text: 'Function Spending', value: 'function-spending' },
+		{ text: 'Foreign Aid', value: 'foreign-aid' },
+		{ text: 'Info', value: 'info' }
+	];
 </script>
 
-<div class="flex space-x-4 mb-6">
-	<button
-		class="px-4 py-2 rounded cursor-pointer {$activePage === 'agency'
-			? 'bg-blue-500 text-white'
-			: 'bg-gray-200'}"
-		onclick={() => setPage('agency')}>Agency</button
-	>
-	<button
-		class="px-4 py-2 rounded cursor-pointer {$activePage === 'function-spending'
-			? 'bg-blue-500 text-white'
-			: 'bg-gray-200'}"
-		onclick={() => setPage('function-spending')}>Function Spending</button
-	>
-	<button
-		class="px-4 py-2 rounded cursor-pointer {$activePage === 'foreign-aid'
-			? 'bg-blue-500 text-white'
-			: 'bg-gray-200'}"
-		onclick={() => setPage('foreign-aid')}>Foreign Aid</button
-	>
-	<button
-		class="px-4 py-2 rounded cursor-pointer {$activePage === 'info'
-			? 'bg-blue-500 text-white'
-			: 'bg-gray-200'}"
-		onclick={() => setPage('info')}>Info</button
-	>
+<div class="flex flex-wrap lg:flex-nowrap w-full justify-around items-center p-4 gap-2">
+	{#each infos as info}
+		<button
+			class="px-4 py-2 rounded cursor-pointer {$activePage === info.value
+				? 'bg-blue-500 text-white'
+				: 'bg-gray-200'}"
+			onclick={() => setPage(info.value)}>{info.text}</button
+		>
+	{/each}
 </div>
 
 {#if $activePage === 'agency'}
