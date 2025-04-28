@@ -28,27 +28,27 @@ var renaming = map[string]string{
 	"Department of Justice":                       "Justice",
 	"Department of Labor":                         "Labor",
 	"Pension Benefit Guaranty Corporation":        "Pension",
+	"Agency for International Development":        "International Development",
 }
 
 var colors = []string{
-	"0, 128, 128",  // Teal
-	"255, 99, 71",  // Tomato
-	"124, 252, 0",  // Lawn Green
-	"70, 130, 180", // Steel Blue
-	"255, 215, 0",  // Gold
-	"0, 191, 255",  // Deep Sky Blue
-	"255, 69, 0",   // Orange Red
-	"138, 43, 226", // Blue Violet
-	"60, 179, 113", // Medium Sea Green
-	"218, 165, 32", // Golden Rod
+	"45, 49, 66",   // Dark Blue-Gray
+	"191, 52, 52",  // Deep Red
+	"52, 138, 167", // Teal Blue
+	"147, 76, 123", // Plum
+	"45, 92, 126",  // Navy Blue
+	"178, 84, 34",  // Burnt Orange
+	"91, 43, 115",  // Deep Purple
+	"52, 125, 87",  // Forest Green
+	"128, 101, 49", // Olive Brown
+	"76, 82, 96",   // Slate Gray
 }
 
-func getNameAndColor(i int, agency string) (string, string) {
-	color := colors[i%9]
+func getNameAndColor(agency string) string {
 	if rename, exists := renaming[agency]; exists {
-		return rename, color
+		return rename
 	}
-	return agency, color
+	return agency
 }
 
 type AgencyBudget struct {
@@ -74,14 +74,14 @@ type returnResult struct {
 	Table     []pieResult `json:"table"`
 }
 
-func addEntry(name, color string, remainingBudget float64, budget float64) pieResult {
+func addEntry(name string, i int, remainingBudget float64, budget float64) pieResult {
+	color := colors[i%10]
 	return pieResult{
 		Proportion: budget / remainingBudget,
 		Amount:     budget,
 		Agency:     name,
 		Color:      color,
 	}
-
 }
 
 func (h *Handler) GetAgencyData(c *gin.Context) {
@@ -109,25 +109,24 @@ func (h *Handler) GetAgencyData(c *gin.Context) {
 	firstPie := []pieResult{}
 	secondPie := []pieResult{}
 	table := []pieResult{}
-	var color string
 	var name string
 
 	for i, agency := range agencyBudgets {
-		name, color = getNameAndColor(i, agency.Agency)
+		name = getNameAndColor(agency.Agency)
 		if i < 9 {
 			firstPie = append(
 				firstPie,
-				addEntry(name, color, totalBudget, agency.Budget),
+				addEntry(name, i, totalBudget, agency.Budget),
 			)
 		} else if i < 18 {
 			secondPie = append(
 				secondPie,
-				addEntry(name, color, totalBudget, agency.Budget),
+				addEntry(name, i-9, totalBudget, agency.Budget),
 			)
 		} else {
 			table = append(
 				table,
-				addEntry(name, color, totalBudget, agency.Budget),
+				addEntry(name, i, totalBudget, agency.Budget),
 			)
 		}
 	}
@@ -135,12 +134,12 @@ func (h *Handler) GetAgencyData(c *gin.Context) {
 	name = fmt.Sprintf("%d other agencies", len(agencyBudgets)-9)
 	firstPie = append(
 		firstPie,
-		addEntry(name, colors[9], totalBudget, mainRemaingBudget),
+		addEntry(name, 9, totalBudget, mainRemaingBudget),
 	)
 	name = fmt.Sprintf("%d other agencies", len(agencyBudgets)-18)
 	secondPie = append(
 		secondPie,
-		addEntry(name, colors[9], totalBudget, otherRmaingBudget),
+		addEntry(name, 9, totalBudget, otherRmaingBudget),
 	)
 
 	c.JSON(http.StatusOK, returnResult{
