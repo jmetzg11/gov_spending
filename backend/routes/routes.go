@@ -22,6 +22,7 @@ func SetupAPIRoutes(router *gin.Engine) {
 			c.JSON(200, gin.H{"message": "hello from backend"})
 		})
 		apiRouter.GET("/agency", handler.GetAgencyData)
+		apiRouter.GET("/function-spending", handler.GetFunctionSpending)
 	}
 }
 
