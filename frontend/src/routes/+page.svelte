@@ -8,16 +8,16 @@
 	import FunctionSpending from './function-spending/FunctionSpending.svelte';
 	import Info from './info/Info.svelte';
 
-	const activePage = writable('agency');
+	const activePage = writable('foreign-aid');
 
 	function setPage(page) {
 		$activePage = page;
 	}
 
 	const infos = [
+		{ text: 'Foreign Aid', value: 'foreign-aid' },
 		{ text: 'Agency', value: 'agency' },
 		{ text: 'Function Spending', value: 'function-spending' },
-		{ text: 'Foreign Aid', value: 'foreign-aid' },
 		{ text: 'Info', value: 'info' }
 	];
 </script>

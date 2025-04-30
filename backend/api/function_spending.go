@@ -53,18 +53,7 @@ func (h *Handler) GetFunctionSpending(c *gin.Context) {
 	for agency := range agencies {
 		agencyList = append(agencyList, agency)
 	}
-	sort.Slice(agencyList, func(i, j int) bool {
-		// Get the most recent year for each agency
-		agencyI := agencyList[i]
-		agencyJ := agencyList[j]
-
-		// Find the most recent data point for each
-		latestYearI := data[agencyI][len(data[agencyI])-1]
-		latestYearJ := data[agencyJ][len(data[agencyJ])-1]
-
-		// Sort by amount in descending order
-		return latestYearI.Amount > latestYearJ.Amount
-	})
+	sort.Strings(agencyList)
 
 	yearList := make([]int, 0, len(years))
 	for year := range years {

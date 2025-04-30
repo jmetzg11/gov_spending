@@ -80,6 +80,41 @@
 				y: {
 					formatter: (value) =>
 						`$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}B`
+				},
+				custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+					const yearValues = [];
+					for (let i = 0; i < series.length; i++) {
+						if (series[i][dataPointIndex] !== undefined) {
+							yearValues.push({
+								name: w.globals.seriesNames[i],
+								value: series[i][dataPointIndex],
+								color: w.globals.colors[i]
+							});
+						}
+					}
+
+					yearValues.sort((a, b) => b.value - a.value);
+
+					let tooltipHTML = `<div class="apexcharts-tooltip-title">${xLabels[dataPointIndex]}</div><div>`;
+
+					yearValues.forEach((item) => {
+						const formattedValue = `$${item.value.toLocaleString(undefined, {
+							minimumFractionDigits: 2,
+							maximumFractionDigits: 2
+						})}B`;
+
+						tooltipHTML += `
+							<div style="display: flex; align-items: center; margin: 5px 0;">
+							<span style="background: ${item.color}; width: 10px; height: 10px; margin-right: 5px;"></span>
+							<span style="flex: 1;">${item.name}:</span>
+							<span style="font-weight: bold;">${formattedValue}</span>
+							</div>
+						`;
+					});
+
+					tooltipHTML += '</div>';
+
+					return tooltipHTML;
 				}
 			},
 			colors: agencies.map((_, index) => colors[index % colors.length]),

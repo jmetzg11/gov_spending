@@ -83,7 +83,6 @@
 					},
 					fillSeriesColor: false,
 					custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-						console.log(data[seriesIndex]);
 						const label = w.config.labels[seriesIndex];
 						const value = formatNumber(data[seriesIndex].amount);
 						return `<div style="background-color: #333333; padding: 8px; border-radius: 4px; color: #ffffff;">
