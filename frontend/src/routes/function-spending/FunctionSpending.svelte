@@ -45,7 +45,7 @@
 	});
 
 	$effect(() => {
-		if (xLabels.length > 0 && agencies.length > 0) {
+		if (xLabels.length > 0 && agencies.length > 0 && ApexCharts) {
 			calculateChartHeight();
 			window.addEventListener('resize', calculateChartHeight);
 			renderChart();

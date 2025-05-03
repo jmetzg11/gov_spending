@@ -14,7 +14,7 @@
 	});
 
 	$effect(() => {
-		if (data && data.length > 0) {
+		if (data && data.length > 0 && ApexCharts) {
 			const options = {
 				chart: {
 					type: 'pie'

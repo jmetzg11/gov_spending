@@ -21,7 +21,7 @@ func SetupAPIRoutes(router *gin.Engine) {
 		apiRouter.GET("/hello", func(c *gin.Context) {
 			c.JSON(200, gin.H{"message": "hello from backend"})
 		})
-		apiRouter.POST("/foreign_aid", handler.GetForeignAid)
+		apiRouter.GET("/foreign_aid", handler.GetForeignAid)
 		apiRouter.GET("/agency", handler.GetAgencyData)
 		apiRouter.GET("/function-spending", handler.GetFunctionSpending)
 	}
