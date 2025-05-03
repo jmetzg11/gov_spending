@@ -1,7 +1,9 @@
 package database
 
 import (
+	"fmt"
 	"log"
+	"os"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -10,6 +12,10 @@ import (
 var DB *gorm.DB
 
 func Connect() error {
+	if err := os.MkdirAll("data", 0755); err != nil {
+		return fmt.Errorf("failed to create data directory: %w", err)
+	}
+
 	var err error
 	DB, err = gorm.Open(sqlite.Open("data/data.db"), &gorm.Config{})
 	if err != nil {
