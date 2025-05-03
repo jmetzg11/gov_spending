@@ -6,107 +6,152 @@ export async function getData() {
 	return respJson.data;
 }
 
-export function getSelectors(data) {
-	const allYears = ['all', ...new Set(data.map((item) => item.Year))].sort((a, b) => {
-		if (a === 'all') return -1;
-		if (b === 'all') return 1;
-		return a - b;
-	});
+export class ForeignAidDataProcessor {
+	constructor(rawData) {
+		this.rawData = rawData;
+		this.dataByYear = {};
+		this.dataByCountry = {};
+		this.dataByCountryAndYear = {};
 
-	const allCountries = ['all', ...new Set(data.map((item) => item.Country))].sort((a, b) => {
-		if (a === 'all') return -1;
-		if (b === 'all') return 1;
-		return a.localeCompare(b);
-	});
-
-	return { allYears, allCountries };
-}
-
-export function getBarData(data, selectedCountry) {
-	let cumulativeData = {};
-	if (selectedCountry === 'all') {
-		data.forEach((item) => {
-			if (item.Year in cumulativeData) {
-				cumulativeData[item.Year] += item.Amount;
-			} else {
-				cumulativeData[item.Year] = item.Amount;
+		this.rawData.forEach((item) => {
+			// data by year
+			if (!this.dataByYear[item.Year]) {
+				this.dataByYear[item.Year] = [];
 			}
-		});
-	} else {
-		const countryData = data.filter((item) => item.Country === selectedCountry);
-		countryData.forEach((item) => {
-			if (item.Year in cumulativeData) {
-				cumulativeData[item.Year] += item.Amount;
-			} else {
-				cumulativeData[item.Year] = item.Amount;
+			this.dataByYear[item.Year].push(item);
+
+			// data by country
+			if (!this.dataByCountry[item.Country]) {
+				this.dataByCountry[item.Country] = [];
 			}
+			this.dataByCountry[item.Country].push(item);
+
+			// data by country and year
+			const key = `${item.Country}-${item.Year}`;
+			if (!this.dataByCountryAndYear[key]) {
+				this.dataByCountryAndYear[key] = [];
+			}
+			this.dataByCountryAndYear[key].push(item);
 		});
+
+		this.years = Object.keys(this.dataByYear).sort((a, b) => a - b);
+		this.countries = Object.keys(this.dataByCountry).sort((a, b) => a.localeCompare(b));
 	}
 
-	const dataArray = [];
-	Object.entries(cumulativeData).forEach(([year, amount]) => {
-		dataArray.push({
-			year: parseInt(year),
-			amount: amount
-		});
-	});
-
-	dataArray.sort((a, b) => a.year - b.year);
-	return dataArray;
-}
-
-export const makeInfoValues = (data, country, year) => {
-	let amount = '';
-	let sentence = '';
-	if (country !== 'all') {
-		data = data.filter((d) => d.Country === country);
+	getSelectors() {
+		return {
+			allYears: ['all', ...this.years],
+			allCountries: ['all', ...this.countries]
+		};
 	}
-	if (year !== 'all') {
-		data = data.filter((d) => d.Year === year);
 
-		amount = data.reduce((acc, val) => {
-			acc += val.Amount;
-			return acc;
-		}, 0);
-		if (country === 'all') {
-			sentence = `Total foreign aid provided by the U.S. in ${year}`;
-			return { sentence, amount };
+	_getFilteredData(country, year) {
+		if (country === 'all' && year === 'all') {
+			return this.rawData;
+		} else if (country === 'all') {
+			return this.dataByYear[year] || [];
+		} else if (year === 'all') {
+			return this.dataByCountry[country] || [];
 		} else {
-			sentence = `Total foreign aid provided by the U.S. to ${country} in ${year}`;
-			return { sentence, amount };
-		}
-	} else {
-		amount = data.reduce((acc, val) => {
-			acc += val.Amount;
-			return acc;
-		}, 0);
-		if (country === 'all') {
-			sentence = 'Total foreign aid provided by the U.S. worldwide since 2017';
-			return { sentence, amount };
-		} else {
-			sentence = `Total foreign aid provided by the U.S. to ${country} since 2017`;
-			return { sentence, amount };
+			return this.dataByCountryAndYear[`${country}-${year}`] || [];
 		}
 	}
-	return { sentence: 'loading', amount: 0 };
-};
 
-export const makeNumber = (amount) => {
-	if (amount === undefined || amount === null || isNaN(amount)) {
-		return '$0';
+	_makeNumber = (amount) => {
+		if (amount === undefined || amount === null || isNaN(amount)) {
+			return '$0';
+		}
+
+		let val;
+		if (amount > 1000000000000) {
+			val = (amount / 1000000000000).toFixed(2);
+			return `$${Number(val).toLocaleString('en')} Trillion`;
+		} else if (amount > 1000000000) {
+			val = (amount / 1000000000).toFixed(2);
+			return `$${Number(val).toLocaleString('en')} Billion`;
+		} else if (amount > 1000000) {
+			val = (amount / 1000000).toFixed(2);
+			return `$${Number(val).toLocaleString('en')} Million`;
+		} else {
+			return '$' + amount.toLocaleString('en');
+		}
+	};
+
+	getInfoValues(country, year) {
+		const filteredData = this._getFilteredData(country, year);
+		const amount = filteredData.reduce((sum, item) => sum + item.Amount, 0);
+
+		let sentence;
+		if (year !== 'all') {
+			sentence =
+				country === 'all'
+					? `Total foreign aid provided by the U.S. in ${year}`
+					: `Total foreign aid provided by the U.S. to ${country} in ${year}`;
+		} else {
+			sentence =
+				country === 'all'
+					? 'Total foreign aid provided by the U.S. worldwide since 2017'
+					: `Total foreign aid provided by the U.S. to ${country} since 2017`;
+		}
+
+		return { sentence, amount: this._makeNumber(amount) };
 	}
 
-	let val;
-	if (amount > 1000000000000) {
-		val = (amount / 1000000000000).toFixed(2);
-		return `$${Number(val).toLocaleString('en')} Trillion`;
-	} else if (amount > 1000000000) {
-		val = (amount / 1000000000).toFixed(2);
-		return `$${Number(val).toLocaleString('en')} Billion`;
-	} else if (amount > 1000000) {
-		val = (amount / 1000000).toFixed(2);
-		return `$${Number(val).toLocaleString('en')} Million`;
-	} else {
-		return '$' + amount.toLocaleString('en');
+	getBarData(selectedCountry) {
+		const data =
+			selectedCountry === 'all' ? this.rawData : this.dataByCountry[selectedCountry] || [];
+
+		const cumulativeByYear = data.reduce((acc, item) => {
+			acc[item.Year] = (acc[item.Year] || 0) + item.Amount;
+			return acc;
+		}, {});
+
+		return Object.entries(cumulativeByYear)
+			.map(([year, amount]) => ({ year: parseInt(year), amount }))
+			.sort((a, b) => a.year - b.year);
 	}
-};
+
+	_normalizeData(data) {
+		const minValue = Math.min(...data.map((item) => item.Amount));
+		const maxValue = Math.max(...data.map((item) => item.Amount));
+		const minRange = 4;
+		const maxRange = 40;
+
+		return data.map((item) => {
+			const normalizedAmount =
+				((item.Amount - minValue) / (maxValue - minValue)) * (maxRange - minRange) + minRange;
+
+			return {
+				country: item.Country,
+				amount: item.Amount,
+				lat: item.Lat,
+				lng: item.Lng,
+				normalizedAmount
+			};
+		});
+	}
+
+	getMapData(selectedYear) {
+		let mapData;
+		if (selectedYear !== 'all') {
+			mapData = this.dataByYear[selectedYear];
+		} else {
+			const aggregatedByCountr = {};
+
+			this.rawData.forEach((item) => {
+				if (!aggregatedByCountr[item.Country]) {
+					aggregatedByCountr[item.Country] = {
+						Country: item.Country,
+						Amount: 0,
+						Lat: item.Lat,
+						Lng: item.Lng
+					};
+				}
+				aggregatedByCountr[item.Country].Amount += item.Amount;
+			});
+
+			mapData = Object.values(aggregatedByCountr);
+		}
+		return this._normalizeData(mapData);
+	}
+}

@@ -4,7 +4,7 @@
 </script>
 
 <div class="text-center text-3xl font-bold mt-5 text-[#333]">{title}</div>
-<div class="flex justify-center mb-5">
+<div class="flex justify-center mb-5 overflow-hidden">
 	<div class="max-w-4xl overflow-x-auto rounded-lg shadow-lg p-3">
 		<table class="min-w-full bg-white">
 			<thead>

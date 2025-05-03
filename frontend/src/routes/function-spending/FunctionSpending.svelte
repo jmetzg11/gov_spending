@@ -28,7 +28,6 @@
 		const url = apiUrl + '/function-spending';
 		const response = await fetch(url);
 		const data = await response.json();
-		console.log(data);
 		lineData = data.data;
 		xLabels = data.years;
 		agencies = data.agencies;

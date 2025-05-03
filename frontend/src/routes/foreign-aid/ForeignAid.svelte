@@ -1,6 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
-	import { getData, getSelectors, getBarData, makeInfoValues, makeNumber } from './helpers';
+	import { getData, ForeignAidDataProcessor } from './helpers';
 	import Selectors from './Selectors.svelte';
 	import Info from './Info.svelte';
 	import Bars from './Bars.svelte';
@@ -11,22 +11,44 @@
 	let selectedCountry = $state('all');
 	let allCountries = $state([]);
 	let barData = $state([]);
+	let dataProcessor;
 
 	let infoSentence = $state('');
 	let infoAmount = $state('');
 
+	let mapData = $state([]);
+
 	$effect(() => {
-		barData = getBarData(data, selectedCountry);
-		const { sentence, amount } = makeInfoValues(data, selectedCountry, selectedYear);
-		infoSentence = sentence;
-		infoAmount = makeNumber(amount);
+		selectedCountry;
+		selectedYear;
+
+		if (dataProcessor) {
+			// barData
+			barData = dataProcessor.getBarData(selectedCountry);
+			// info
+			const { sentence, amount } = dataProcessor.getInfoValues(selectedCountry, selectedYear);
+			infoSentence = sentence;
+			infoAmount = amount;
+			// mapData
+			mapData = dataProcessor.getMapData(selectedYear);
+		}
 	});
 
 	onMount(async () => {
-		data = await getData();
-		const selectors = getSelectors(data);
+		const rawData = await getData();
+		dataProcessor = new ForeignAidDataProcessor(rawData);
+		// selectors
+		const selectors = dataProcessor.getSelectors();
 		allYears = selectors.allYears;
 		allCountries = selectors.allCountries;
+		// barData
+		barData = dataProcessor.getBarData(selectedCountry);
+		// info
+		const { sentence, amount } = dataProcessor.getInfoValues(selectedCountry, selectedYear);
+		infoSentence = sentence;
+		infoAmount = amount;
+		// mapData
+		mapData = dataProcessor.getMapData(selectedYear);
 	});
 </script>
 
@@ -50,6 +72,6 @@
 		</div>
 	</div>
 	<div class="flex-grow">
-		<Map />
+		<Map data={mapData} {selectedYear} />
 	</div>
 </div>
