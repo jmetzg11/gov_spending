@@ -4,12 +4,11 @@
 	let ApexCharts;
 	let chart;
 	let chartId = 'bar-graph';
-
-	$inspect(data);
+	let isReady = $state(false);
 
 	onMount(async () => {
 		ApexCharts = (await import('apexcharts')).default;
-
+		isReady = true;
 		return () => {
 			if (chart) {
 				chart.destroy();
@@ -18,9 +17,15 @@
 	});
 
 	$effect(() => {
-		if (data && data.length > 0 && ApexCharts) {
+		if (data && data.length > 0 && isReady) {
 			if (chart) {
 				chart.destroy();
+			}
+
+			const element = document.getElementById(chartId);
+			if (!element) {
+				console.log('Chart element not found');
+				return;
 			}
 			const options = {
 				chart: {
@@ -99,7 +104,7 @@
 					}
 				]
 			};
-			chart = new ApexCharts(document.getElementById(chartId), options);
+			chart = new ApexCharts(element, options);
 			chart.render();
 		}
 	});

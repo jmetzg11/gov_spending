@@ -1,6 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
-	import { getData, getSelectors, getBarData } from './helpers';
+	import { getData, getSelectors, getBarData, makeInfoValues, makeNumber } from './helpers';
 	import Selectors from './Selectors.svelte';
 	import Info from './Info.svelte';
 	import Bars from './Bars.svelte';
@@ -11,13 +11,15 @@
 	let selectedCountry = $state('all');
 	let allCountries = $state([]);
 	let barData = $state([]);
+
+	let infoSentence = $state('');
+	let infoAmount = $state('');
+
 	$effect(() => {
-		console.log('something changed');
-		console.log('Year:', selectedYear);
-		console.log('Country:', selectedCountry);
-		if (data.length > 0 && selectedCountry) {
-			barData = getBarData(data, selectedCountry);
-		}
+		barData = getBarData(data, selectedCountry);
+		const { sentence, amount } = makeInfoValues(data, selectedCountry, selectedYear);
+		infoSentence = sentence;
+		infoAmount = makeNumber(amount);
 	});
 
 	onMount(async () => {
@@ -40,9 +42,11 @@
 						countries={allCountries}
 					/>
 				</div>
-				<div class="flex-1"><Info /></div>
+				<div class="flex-1"><Info {infoSentence} {infoAmount} /></div>
 			</div>
-			<div class="h-[60%] w-full"><Bars data={barData} /></div>
+			<div class="h-[60%] w-full">
+				<Bars data={barData} />
+			</div>
 		</div>
 	</div>
 	<div class="flex-grow">

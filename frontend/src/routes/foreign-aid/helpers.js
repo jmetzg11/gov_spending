@@ -54,3 +54,59 @@ export function getBarData(data, selectedCountry) {
 	dataArray.sort((a, b) => a.year - b.year);
 	return dataArray;
 }
+
+export const makeInfoValues = (data, country, year) => {
+	let amount = '';
+	let sentence = '';
+	if (country !== 'all') {
+		data = data.filter((d) => d.Country === country);
+	}
+	if (year !== 'all') {
+		data = data.filter((d) => d.Year === year);
+
+		amount = data.reduce((acc, val) => {
+			acc += val.Amount;
+			return acc;
+		}, 0);
+		if (country === 'all') {
+			sentence = `Total foreign aid provided by the U.S. in ${year}`;
+			return { sentence, amount };
+		} else {
+			sentence = `Total foreign aid provided by the U.S. to ${country} in ${year}`;
+			return { sentence, amount };
+		}
+	} else {
+		amount = data.reduce((acc, val) => {
+			acc += val.Amount;
+			return acc;
+		}, 0);
+		if (country === 'all') {
+			sentence = 'Total foreign aid provided by the U.S. worldwide since 2017';
+			return { sentence, amount };
+		} else {
+			sentence = `Total foreign aid provided by the U.S. to ${country} since 2017`;
+			return { sentence, amount };
+		}
+	}
+	return { sentence: 'loading', amount: 0 };
+};
+
+export const makeNumber = (amount) => {
+	if (amount === undefined || amount === null || isNaN(amount)) {
+		return '$0';
+	}
+
+	let val;
+	if (amount > 1000000000000) {
+		val = (amount / 1000000000000).toFixed(2);
+		return `$${Number(val).toLocaleString('en')} Trillion`;
+	} else if (amount > 1000000000) {
+		val = (amount / 1000000000).toFixed(2);
+		return `$${Number(val).toLocaleString('en')} Billion`;
+	} else if (amount > 1000000) {
+		val = (amount / 1000000).toFixed(2);
+		return `$${Number(val).toLocaleString('en')} Million`;
+	} else {
+		return '$' + amount.toLocaleString('en');
+	}
+};
